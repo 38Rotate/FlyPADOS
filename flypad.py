@@ -2,7 +2,6 @@
 
 import streamlit as st
 import numpy as np
-from scipy.interpolate import interp2d
 from ac_profile import moment as mm
 from ac_profile import weights as wh
 import math
