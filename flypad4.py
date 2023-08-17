@@ -4,6 +4,8 @@ from scipy.interpolate import interp2d
 from ac_profile import moment as mm
 from ac_profile import weights as wh
 import math
+from scipy.interpolate import RegularGridInterpolator
+
 
 st.title("FlyPad OS V1.1")
 
@@ -83,19 +85,20 @@ climb_rates_1050 = [
 
 
 def interpolate_data(weight, altitudes, temperatures, data_1050, data_1320):
-    return np.array([
+    interpolated_data = np.array([
         data_1050[i][j] + (weight - 1050) * (data_1320[i]
                                              [j] - data_1050[i][j]) / (1320 - 1050)
         for i in range(len(altitudes)) for j in range(len(temperatures))
     ]).reshape(len(altitudes), len(temperatures))
+    return interpolated_data
 
 
 def get_interpolated_value(weight, altitude, temperature, data_1050, data_1320):
     interpolated_data = interpolate_data(
         weight, altitudes, temperatures, data_1050, data_1320)
-    interpolator = interp2d(temperatures, altitudes,
-                            interpolated_data, kind='linear')
-    return interpolator(temperature, altitude)[0]
+    interpolator = RegularGridInterpolator(
+        (altitudes, temperatures), interpolated_data)
+    return interpolator([altitude, temperature])[0]
 
 
 def landing_roll(alt, grv, ffobs):
