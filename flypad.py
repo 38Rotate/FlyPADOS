@@ -5,7 +5,6 @@ import numpy as np
 from ac_profile import moment as mm
 from ac_profile import weights as wh
 import math
-from scipy.interpolate import RegularGridInterpolator
 import pandas as pd
 
 
