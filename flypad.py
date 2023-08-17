@@ -1,4 +1,4 @@
-#Version 1.0.5
+#Version 1.0.10
 
 import streamlit as st
 import numpy as np
@@ -6,9 +6,10 @@ from ac_profile import moment as mm
 from ac_profile import weights as wh
 import math
 from scipy.interpolate import RegularGridInterpolator
+import pandas as pd
 
 
-st.title("FlyPad OS V1.1")
+st.title("FlyPad OS V1.0.10")
 
 # ---------------------------- Data Definitions ----------------------------- #
 
@@ -97,9 +98,17 @@ def interpolate_data(weight, altitudes, temperatures, data_1050, data_1320):
 def get_interpolated_value(weight, altitude, temperature, data_1050, data_1320):
     interpolated_data = interpolate_data(
         weight, altitudes, temperatures, data_1050, data_1320)
-    interpolator = RegularGridInterpolator(
-        (altitudes, temperatures), interpolated_data)
-    return interpolator([altitude, temperature])[0]
+
+    # Interpolate along the altitude axis
+    df_alt = pd.DataFrame(
+        interpolated_data, index=altitudes, columns=temperatures)
+    interpolated_along_alt = df_alt.interpolate(method='index').loc[altitude]
+
+    # Interpolate along the temperature axis
+    df_temp = pd.Series(interpolated_along_alt, index=temperatures)
+    result = df_temp.interpolate(method='index').loc[temperature]
+
+    return result
 
 
 def landing_roll(alt, grv, ffobs):
@@ -226,3 +235,4 @@ st.write(
     f"Landing roll: {igr:.2f} ft, 50-foot clearance distance: {iff:.2f} ft")
 
 # To run the Streamlit app, save this code to a file, say "app.py", and then run `streamlit run app.py` in your terminal.
+
